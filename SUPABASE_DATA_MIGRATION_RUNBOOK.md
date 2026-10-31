@@ -4,7 +4,7 @@
 
 Preparation only. This document does not run SQL, deploy Edge Functions, change frontend endpoints, or alter production.
 
-**Migration is blocked until the source of existing applications and ID documents is identified and a verified backup is available.** Do not assume the target project is the source project. The repository's `employment.html` and `admin.html` currently reference `dolzafpaqbhonbcrmhqv.supabase.co`, while the migration guide describes this as the new project. Confirm which project currently holds production data before any copy or cutover.
+**Source confirmed by the owner:** the current source is the Supabase project `dolzafpaqbhonbcrmhqv` (URL `https://dolzafpaqbhonbcrmhqv.supabase.co`). The destination project has not yet been identified. Migration remains blocked until the destination is confirmed, access to both projects is available through authorized secure tools, and a verified source backup is created. No source data has been accessed or copied by this preparation.
 
 ## Safety requirements
 
@@ -20,11 +20,10 @@ Preparation only. This document does not run SQL, deploy Edge Functions, change 
 
 Before copying data, an authorized project owner must confirm:
 
-1. The exact source backend currently receiving live employment submissions.
-2. The exact target Supabase project and its project reference.
-3. Whether the source contains application rows, ID files, or both; and whether there are other storage locations or email/form providers.
-4. Whether writes can be paused briefly for a consistent final export, or whether a two-pass migration (initial copy, then final delta) is needed.
-5. Who is authorized to access applicant records and who can approve the migration.
+1. The exact target Supabase project and its project reference.
+2. Whether the source contains application rows, ID files, or both; and whether there are other storage locations or email/form providers.
+3. Whether writes can be paused briefly for a consistent final export, or whether a two-pass migration (initial copy, then final delta) is needed.
+4. Who is authorized to access applicant records and who can approve the migration.
 
 Record project names/references and counts only in a restricted operational record. Do not record secrets or applicant data in this repository.
 
