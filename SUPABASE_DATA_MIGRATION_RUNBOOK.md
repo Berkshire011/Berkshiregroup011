@@ -4,7 +4,7 @@
 
 Preparation only. This document does not run SQL, deploy Edge Functions, change frontend endpoints, or alter production.
 
-**Source confirmed by the owner:** the current source is the Supabase project `dolzafpaqbhonbcrmhqv` (URL `https://dolzafpaqbhonbcrmhqv.supabase.co`). The destination project has not yet been identified. Migration remains blocked until the destination is confirmed, access to both projects is available through authorized secure tools, and a verified source backup is created. No source data has been accessed or copied by this preparation.
+**Source confirmed by the owner:** the current source is the Supabase project `dolzafpaqbhonbcrmhqv` (URL `https://dolzafpaqbhonbcrmhqv.supabase.co`). **Destination decision confirmed:** create a new Supabase project. Its project reference, region, and owner access are still pending. Migration remains blocked until the new project is created, access to both projects is available through authorized secure tools, and a verified source backup is created. No source data has been accessed or copied by this preparation.
 
 ## Safety requirements
 
@@ -20,7 +20,7 @@ Preparation only. This document does not run SQL, deploy Edge Functions, change 
 
 Before copying data, an authorized project owner must confirm:
 
-1. The exact target Supabase project and its project reference.
+1. Create a new Supabase project and record its exact project reference and region in the restricted operational record.
 2. Whether the source contains application rows, ID files, or both; and whether there are other storage locations or email/form providers.
 3. Whether writes can be paused briefly for a consistent final export, or whether a two-pass migration (initial copy, then final delta) is needed.
 4. Who is authorized to access applicant records and who can approve the migration.
