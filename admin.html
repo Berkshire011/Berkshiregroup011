@@ -1,271 +1,645 @@
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex,nofollow">
-<title>Berkshire Group — Employment Applications</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employment Applications Admin</title>
+  <meta name="robots" content="noindex, nofollow">
 
-<style>
-:root {
-  font-family: system-ui, -apple-system, Segoe UI, sans-serif;
-  color: #18212b;
-  background: #f4f6f8;
-}
-body { margin: 0; }
-main { max-width: 1100px; margin: 32px auto; padding: 0 16px 40px; }
-.panel { background: white; border: 1px solid #dce2e8; border-radius: 12px; padding: 20px; margin: 16px 0; }
-input, button, select { font: inherit; padding: 10px 12px; border: 1px solid #b8c2cc; border-radius: 7px; }
-input { width: min(100%,420px); box-sizing: border-box; display: block; margin: 8px 0 14px; }
-button { cursor: pointer; background: #172b3a; color: white; margin: 4px 4px 4px 0; }
-button.secondary { background: white; color: #172b3a; }
-table { width: 100%; border-collapse: collapse; }
-th, td { text-align: left; border-bottom: 1px solid #e5e9ee; padding: 10px 8px; }
-.muted { color: #52606d; }
-.error { color: #a12727; }
-.hidden { display: none; }
-.table-wrap { overflow-x: auto; }
-a { color: #174f7a; }
-dd { margin: 0 0 10px; overflow-wrap: anywhere; }
-</style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      background: #f4f6f9;
+      color: #202938;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1, h2 { margin-top: 0; }
+
+    .panel {
+      background: #fff;
+      border: 1px solid #e1e6ed;
+      border-radius: 10px;
+      padding: 22px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.04);
+    }
+
+    label {
+      display: block;
+      margin: 12px 0 6px;
+      font-weight: 600;
+    }
+
+    input, select, button {
+      font: inherit;
+      border-radius: 6px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 11px;
+      border: 1px solid #cbd3df;
+      background: white;
+    }
+
+    button {
+      padding: 10px 15px;
+      border: 0;
+      background: #164e8a;
+      color: white;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    button:hover { background: #103c6b; }
+    button:disabled { opacity: .6; cursor: wait; }
+
+    .secondary { background: #566273; }
+    .danger { background: #a72c36; }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .toolbar input { max-width: 360px; }
+
+    .message {
+      padding: 12px;
+      margin: 12px 0;
+      border-radius: 6px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .error { background: #fff0f0; color: #9d2020; }
+    .success { background: #eaf8ee; color: #176534; }
+    .muted { color: #667085; }
+    .hidden { display: none !important; }
+
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      background: white;
+    }
+
+    th, td {
+      padding: 12px 10px;
+      text-align: left;
+      border-bottom: 1px solid #e6eaf0;
+      vertical-align: top;
+    }
+
+    th { background: #f7f9fc; }
+
+    td button {
+      margin: 2px;
+      padding: 7px 10px;
+      font-size: 13px;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 4px 8px;
+      background: #edf1f6;
+      border-radius: 20px;
+      font-size: 12px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .detail-item {
+      padding: 12px;
+      border: 1px solid #e4e8ef;
+      border-radius: 6px;
+      overflow-wrap: anywhere;
+    }
+
+    .detail-item strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #465267;
+      font-size: 13px;
+    }
+
+    .detail-item a { overflow-wrap: anywhere; }
+
+    @media (max-width: 600px) {
+      body { padding: 12px; }
+      .panel { padding: 15px; }
+    }
+  </style>
 </head>
 
 <body>
-<main>
-<h1>Employment applications</h1>
-<p class="muted">Private administrator dashboard. Applicant details and ID documents are sensitive; sign out on shared devices.</p>
+  <main class="container">
+    <h1>Employment Applications Admin</h1>
+    <p class="muted">Authorized administrators only.</p>
 
-<section class="panel" id="login-panel">
-  <h2>Administrator sign in</h2>
-  <form id="login-form">
-    <label for="email">Administrator email</label>
-    <input id="email" type="email" autocomplete="username" required>
-    <label for="password">Password</label>
-    <input id="password" type="password" autocomplete="current-password" required>
-    <button type="submit">Sign in</button>
-  </form>
-  <p id="login-message" role="status" class="muted"></p>
-</section>
+    <div id="message" class="message hidden" role="status" aria-live="polite"></div>
 
-<section class="panel hidden" id="dashboard-panel">
-  <button id="refresh" type="button">Refresh list</button>
-  <button id="sign-out" type="button" class="secondary">Sign out</button>
-  <p id="status-message" role="status" class="muted"></p>
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Received</th><th>Reference</th><th>Status</th><th>Notification</th><th></th>
-        </tr>
-      </thead>
-      <tbody id="application-rows"></tbody>
-    </table>
-  </div>
-</section>
+    <section id="loginPanel" class="panel">
+      <h2>Administrator Login</h2>
 
-<section class="panel hidden" id="detail-panel">
-  <h2>Application details</h2>
-  <p class="muted">Document links expire after 60 seconds. Do not forward or share them.</p>
-  <div id="detail-content"></div>
-  <label for="new-status">Application status</label>
-  <select id="new-status">
-    <option value="new">New</option>
-    <option value="in_review">In review</option>
-    <option value="interview">Interview</option>
-    <option value="hired">Hired</option>
-    <option value="rejected">Rejected</option>
-    <option value="withdrawn">Withdrawn</option>
-  </select>
-  <button id="save-status" type="button">Save status</button>
-  <p id="detail-message" role="status" class="muted"></p>
-</section>
-</main>
+      <form id="loginForm">
+        <label for="email">Email address</label>
+        <input
+          id="email"
+          type="email"
+          autocomplete="username"
+          required
+          value="danielleannlewis45@gmail.com"
+        >
 
-<script>
-(function () {
-  // Public browser settings for the NEW Supabase project.
-  // Replace the placeholder below with this project's publishable key.
-  var SUPABASE_URL = "https://vmldldmqvzyzqznjbgmq.supabase.co";
-  var SUPABASE_ANON_KEY = "PASTE_NEW_PROJECT_PUBLISHABLE_KEY_HERE";
+        <label for="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          autocomplete="current-password"
+          required
+        >
 
-  var client = null;
-  var currentApplicationId = null;
+        <p>
+          <button id="loginButton" type="submit">Log in</button>
+        </p>
+      </form>
+    </section>
 
-  var loginPanel = document.getElementById("login-panel");
-  var dashboardPanel = document.getElementById("dashboard-panel");
-  var detailPanel = document.getElementById("detail-panel");
-  var loginMessage = document.getElementById("login-message");
-  var statusMessage = document.getElementById("status-message");
-  var detailMessage = document.getElementById("detail-message");
+    <section id="dashboardPanel" class="panel hidden">
+      <div class="toolbar">
+        <div>
+          <h2>Applications</h2>
+          <p id="signedInAs" class="muted"></p>
+        </div>
 
-  function esc(value) {
-    return String(value == null ? "" : value).replace(/[&<>"']/g, function (c) {
-      return {
-        "&": "&amp;", "<": "&lt;", ">": "&gt;",
-        '"': "&quot;", "'": "&#39;"
-      }[c];
-    });
-  }
+        <div>
+          <button id="refreshButton" type="button" class="secondary">Refresh</button>
+          <button id="logoutButton" type="button" class="danger">Log out</button>
+        </div>
+      </div>
 
-  async function adminRequest(body) {
-    var sr = await client.auth.getSession();
-    var token = sr.data.session && sr.data.session.access_token;
+      <label for="searchInput">Search by application ID or status</label>
+      <input id="searchInput" type="search" placeholder="Search applications">
 
-    if (!token) throw new Error("Session expired. Please sign in again.");
+      <div id="listMessage" class="muted"></div>
 
-    var response = await fetch(
-      SUPABASE_URL + "/functions/v1/admin-employment",
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Submitted</th>
+              <th>Application ID</th>
+              <th>Status</th>
+              <th>Notification</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="applicationsBody">
+            <tr><td colspan="5">Log in to view applications.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="detailPanel" class="panel hidden">
+      <div class="toolbar">
+        <h2>Application Details</h2>
+        <button id="closeDetailButton" class="secondary" type="button">Close</button>
+      </div>
+
+      <div id="detailContent"></div>
+
+      <hr style="border:0;border-top:1px solid #e4e8ef;margin:22px 0">
+
+      <h3>Update application status</h3>
+      <label for="statusSelect">New status</label>
+      <select id="statusSelect">
+        <option value="pending">Pending</option>
+        <option value="reviewing">Reviewing</option>
+        <option value="approved">Approved</option>
+        <option value="rejected">Rejected</option>
+      </select>
+
+      <p>
+        <button id="saveStatusButton" type="button">Save Status</button>
+      </p>
+    </section>
+  </main>
+
+  <script>
+    "use strict";
+
+    // Destination Supabase project.
+    const SUPABASE_URL = "https://vmldldmqvzyzqznjbgmq.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_zekZasCUflAdjvjfzC26zg_A_A-esFW";
+
+    const FUNCTION_URL = SUPABASE_URL + "/functions/v1/admin-employment";
+
+    const supabaseClient = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY,
       {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + token,
-          "apikey": SUPABASE_ANON_KEY
-        },
-        body: JSON.stringify(body)
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true
+        }
       }
     );
 
-    var result = await response.json().catch(function () { return {}; });
-    if (!response.ok) throw new Error(result.error || "Request failed.");
-    return result;
-  }
+    const loginPanel = document.getElementById("loginPanel");
+    const dashboardPanel = document.getElementById("dashboardPanel");
+    const detailPanel = document.getElementById("detailPanel");
+    const messageBox = document.getElementById("message");
+    const applicationsBody = document.getElementById("applicationsBody");
+    const listMessage = document.getElementById("listMessage");
+    const detailContent = document.getElementById("detailContent");
 
-  async function loadApplications() {
-    statusMessage.textContent = "Loading applications…";
-    statusMessage.className = "muted";
+    let applications = [];
+    let selectedApplicationId = null;
+    let busy = false;
 
-    try {
-      var result = await adminRequest({ action: "list", limit: 100 });
-      var rows = result.applications || [];
-
-      document.getElementById("application-rows").innerHTML =
-        rows.map(function (app) {
-          return "<tr><td>" + esc(new Date(app.created_at).toLocaleString()) +
-            "</td><td><code>" + esc(app.id) +
-            "</code></td><td>" + esc(app.status) +
-            "</td><td>" + esc(app.notification_status) +
-            "</td><td><button type='button' data-id='" + esc(app.id) +
-            "' class='view-application'>View</button></td></tr>";
-        }).join("") ||
-        "<tr><td colspan='5'>No applications received yet.</td></tr>";
-
-      statusMessage.textContent = rows.length + " application(s).";
-
-      document.querySelectorAll(".view-application").forEach(function (button) {
-        button.addEventListener("click", function () {
-          viewApplication(button.getAttribute("data-id"));
-        });
-      });
-    } catch (error) {
-      statusMessage.textContent = error.message;
-      statusMessage.className = "error";
-    }
-  }
-
-  async function viewApplication(id) {
-    currentApplicationId = id;
-    detailMessage.textContent = "Loading secure details…";
-    detailMessage.className = "muted";
-    detailPanel.classList.remove("hidden");
-
-    try {
-      var result = await adminRequest({ action: "detail", id: id });
-      var app = result.application;
-      var fields = app.payload || {};
-      var html = "<p><strong>Reference:</strong> " + esc(app.id) + "</p><dl>";
-
-      Object.keys(fields).sort().forEach(function (key) {
-        var value = Array.isArray(fields[key]) ? fields[key].join(", ") : fields[key];
-        html += "<dt><strong>" + esc(key.replace(/_/g, " ")) +
-          "</strong></dt><dd>" + esc(value) + "</dd>";
-      });
-
-      html += "</dl><p><a rel='noopener noreferrer' target='_blank' href='" +
-        esc(app.documents.front_url) +
-        "'>Open front of ID (temporary link)</a></p><p><a rel='noopener noreferrer' target='_blank' href='" +
-        esc(app.documents.back_url) +
-        "'>Open back of ID (temporary link)</a></p>";
-
-      document.getElementById("detail-content").innerHTML = html;
-      document.getElementById("new-status").value = app.status;
-      detailMessage.textContent = "Details loaded. Document links expire after 60 seconds.";
-    } catch (error) {
-      detailMessage.textContent = error.message;
-      detailMessage.className = "error";
-    }
-  }
-
-  document.getElementById("login-form").addEventListener("submit", async function (event) {
-    event.preventDefault();
-
-    if (!window.supabase ||
-        SUPABASE_ANON_KEY === "PASTE_NEW_PROJECT_PUBLISHABLE_KEY_HERE") {
-      loginMessage.textContent = "Setup incomplete. Add the new project's publishable key to admin.html.";
-      loginMessage.className = "error";
-      return;
+    function showMessage(text, type = "error") {
+      messageBox.textContent = text;
+      messageBox.className = "message " + type;
+      messageBox.classList.remove("hidden");
     }
 
-    client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    loginMessage.textContent = "Signing in…";
-    loginMessage.className = "muted";
+    function clearMessage() {
+      messageBox.textContent = "";
+      messageBox.className = "message hidden";
+    }
 
-    try {
-      var result = await client.auth.signInWithPassword({
-        email: document.getElementById("email").value,
-        password: document.getElementById("password").value
+    function setBusy(value) {
+      busy = value;
+      document.querySelectorAll("button").forEach(button => {
+        button.disabled = value;
+      });
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[character]);
+    }
+
+    function formatDate(value) {
+      if (!value) return "—";
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString();
+    }
+
+    async function getSession() {
+      const { data, error } = await supabaseClient.auth.getSession();
+      if (error) throw error;
+      return data.session;
+    }
+
+    async function callAdminFunction(action, extra = {}) {
+      const session = await getSession();
+
+      if (!session || !session.access_token) {
+        throw new Error("Your session has expired. Please log in again.");
+      }
+
+      const response = await fetch(FUNCTION_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + session.access_token,
+          "apikey": SUPABASE_ANON_KEY
+        },
+        body: JSON.stringify({ action, ...extra })
       });
 
-      if (result.error) {
-        loginMessage.textContent = "Sign-in failed. Check the administrator account and password.";
-        loginMessage.className = "error";
+      const rawText = await response.text();
+      let result = {};
+
+      try {
+        result = rawText ? JSON.parse(rawText) : {};
+      } catch {
+        result = { error: rawText || "The server returned an unreadable response." };
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          result.error ||
+          result.message ||
+          "The admin service returned HTTP " + response.status
+        );
+      }
+
+      if (result.error) throw new Error(result.error);
+      return result;
+    }
+
+    function setLoggedIn(isLoggedIn, email = "") {
+      loginPanel.classList.toggle("hidden", isLoggedIn);
+      dashboardPanel.classList.toggle("hidden", !isLoggedIn);
+
+      if (!isLoggedIn) {
+        detailPanel.classList.add("hidden");
+        applications = [];
+        selectedApplicationId = null;
+      }
+
+      document.getElementById("signedInAs").textContent =
+        isLoggedIn ? "Signed in as " + email : "";
+    }
+
+    async function loadApplications() {
+      clearMessage();
+      listMessage.textContent = "Loading applications…";
+      applicationsBody.innerHTML =
+        '<tr><td colspan="5">Loading…</td></tr>';
+
+      try {
+        const result = await callAdminFunction("list");
+        applications = Array.isArray(result.applications)
+          ? result.applications
+          : Array.isArray(result.data)
+            ? result.data
+            : [];
+
+        renderApplications();
+        listMessage.textContent = applications.length
+          ? applications.length + " application(s)"
+          : "No applications found.";
+      } catch (error) {
+        applicationsBody.innerHTML =
+          '<tr><td colspan="5">Could not load applications.</td></tr>';
+        listMessage.textContent = "";
+        showMessage("Could not load applications: " + error.message);
+      }
+    }
+
+    function renderApplications() {
+      const query = document.getElementById("searchInput").value
+        .trim()
+        .toLowerCase();
+
+      const filtered = applications.filter(application => {
+        const searchable = [
+          application.id,
+          application.status,
+          application.notification_status,
+          application.created_at
+        ].join(" ").toLowerCase();
+
+        return searchable.includes(query);
+      });
+
+      if (!filtered.length) {
+        applicationsBody.innerHTML =
+          '<tr><td colspan="5">No matching applications.</td></tr>';
         return;
       }
 
-      loginPanel.classList.add("hidden");
-      dashboardPanel.classList.remove("hidden");
-      await loadApplications();
-    } catch (error) {
-      loginMessage.textContent = "Could not sign in. Please try again.";
-      loginMessage.className = "error";
+      applicationsBody.innerHTML = filtered.map(application => {
+        const id = String(application.id ?? "");
+        return `
+          <tr>
+            <td>${escapeHtml(formatDate(application.created_at))}</td>
+            <td>${escapeHtml(id)}</td>
+            <td><span class="status">${escapeHtml(application.status || "pending")}</span></td>
+            <td>${escapeHtml(application.notification_status || "—")}</td>
+            <td>
+              <button type="button" data-action="detail" data-id="${escapeHtml(id)}">
+                View
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join("");
     }
-  });
 
-  document.getElementById("refresh").addEventListener("click", loadApplications);
+    async function openApplication(id) {
+      clearMessage();
+      selectedApplicationId = id;
+      detailPanel.classList.remove("hidden");
+      detailContent.textContent = "Loading application details…";
+      document.getElementById("statusSelect").value = "pending";
+      detailPanel.scrollIntoView({ behavior: "smooth", block: "start" });
 
-  document.getElementById("sign-out").addEventListener("click", async function () {
-    if (client) await client.auth.signOut();
-    client = null;
-    currentApplicationId = null;
-    dashboardPanel.classList.add("hidden");
-    detailPanel.classList.add("hidden");
-    loginPanel.classList.remove("hidden");
-    document.getElementById("application-rows").innerHTML = "";
-  });
+      try {
+        const result = await callAdminFunction("detail", { id });
+        const application = result.application || result.data || result;
 
-  document.getElementById("save-status").addEventListener("click", async function () {
-    if (!currentApplicationId) return;
+        if (!application || typeof application !== "object") {
+          throw new Error("The server returned no application details.");
+        }
 
-    detailMessage.textContent = "Saving…";
-    detailMessage.className = "muted";
+        selectedApplicationId = application.id || id;
+        document.getElementById("statusSelect").value =
+          application.status || "pending";
 
-    try {
-      await adminRequest({
-        action: "update-status",
-        id: currentApplicationId,
-        status: document.getElementById("new-status").value
-      });
-      detailMessage.textContent = "Status updated.";
-      await loadApplications();
-    } catch (error) {
-      detailMessage.textContent = error.message;
-      detailMessage.className = "error";
+        renderDetails(application);
+      } catch (error) {
+        detailContent.textContent = "";
+        showMessage("Could not load application details: " + error.message);
+      }
     }
-  });
-})();
-</script>
+
+    function renderDetails(application) {
+      const payload = application.payload &&
+        typeof application.payload === "object"
+        ? application.payload
+        : {};
+
+      const excluded = new Set([
+        "driver_license_id_front",
+        "driver_license_id_back",
+        "front_storage_path",
+        "back_storage_path"
+      ]);
+
+      const fields = Object.entries(payload).filter(([key]) => !excluded.has(key));
+
+      const fieldHtml = fields.map(([key, value]) => {
+        let displayValue;
+
+        if (value === null || value === undefined || value === "") {
+          displayValue = "—";
+        } else if (typeof value === "object") {
+          displayValue = JSON.stringify(value, null, 2);
+        } else {
+          displayValue = String(value);
+        }
+
+        return `
+          <div class="detail-item">
+            <strong>${escapeHtml(key.replace(/_/g, " "))}</strong>
+            <div>${escapeHtml(displayValue)}</div>
+          </div>
+        `;
+      }).join("");
+
+      const frontUrl = application.front_signed_url ||
+        application.front_url ||
+        application.driver_license_id_front_url ||
+        "";
+
+      const backUrl = application.back_signed_url ||
+        application.back_url ||
+        application.driver_license_id_back_url ||
+        "";
+
+      const documentLinks = `
+        <div class="detail-item">
+          <strong>Driver's license — front</strong>
+          ${frontUrl
+            ? `<a href="${escapeHtml(frontUrl)}" target="_blank" rel="noopener noreferrer">Open secure document link</a>`
+            : "No document link returned"}
+        </div>
+        <div class="detail-item">
+          <strong>Driver's license — back</strong>
+          ${backUrl
+            ? `<a href="${escapeHtml(backUrl)}" target="_blank" rel="noopener noreferrer">Open secure document link</a>`
+            : "No document link returned"}
+        </div>
+      `;
+
+      detailContent.innerHTML = `
+        <p><strong>Application ID:</strong> ${escapeHtml(application.id || selectedApplicationId)}</p>
+        <p><strong>Submitted:</strong> ${escapeHtml(formatDate(application.created_at))}</p>
+        <p><strong>Notification status:</strong> ${escapeHtml(application.notification_status || "—")}</p>
+        <h3>Applicant information</h3>
+        <div class="detail-grid">${fieldHtml || '<p>No applicant fields were returned.</p>'}</div>
+        <h3 style="margin-top:20px">Identity documents</h3>
+        <p class="muted">These links may expire. Do not share or download identity documents on a public computer.</p>
+        <div class="detail-grid">${documentLinks}</div>
+      `;
+    }
+
+    async function saveStatus() {
+      if (!selectedApplicationId) {
+        showMessage("Open an application before updating its status.");
+        return;
+      }
+
+      const status = document.getElementById("statusSelect").value;
+      clearMessage();
+      setBusy(true);
+
+      try {
+        await callAdminFunction("update-status", {
+          id: selectedApplicationId,
+          status
+        });
+
+        showMessage("Application status updated.", "success");
+        await loadApplications();
+        await openApplication(selectedApplicationId);
+      } catch (error) {
+        showMessage("Could not update status: " + error.message);
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    document.getElementById("loginForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      clearMessage();
+
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const loginButton = document.getElementById("loginButton");
+
+      loginButton.disabled = true;
+
+      try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (error) throw error;
+
+        if (!data.session) {
+          throw new Error("Login succeeded but no session was returned.");
+        }
+
+        setLoggedIn(true, data.user?.email || email);
+        await loadApplications();
+      } catch (error) {
+        showMessage("Login failed: " + error.message);
+      } finally {
+        loginButton.disabled = false;
+      }
+    });
+
+    document.getElementById("logoutButton").addEventListener("click", async () => {
+      clearMessage();
+
+      try {
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) throw error;
+
+        setLoggedIn(false);
+        showMessage("You have been logged out.", "success");
+      } catch (error) {
+        showMessage("Logout failed: " + error.message);
+      }
+    });
+
+    document.getElementById("refreshButton").addEventListener("click", loadApplications);
+    document.getElementById("searchInput").addEventListener("input", renderApplications);
+    document.getElementById("saveStatusButton").addEventListener("click", saveStatus);
+
+    document.getElementById("closeDetailButton").addEventListener("click", () => {
+      detailPanel.classList.add("hidden");
+      selectedApplicationId = null;
+    });
+
+    applicationsBody.addEventListener("click", event => {
+      const button = event.target.closest('button[data-action="detail"]');
+      if (!button) return;
+      openApplication(button.dataset.id);
+    });
+
+    async function initialize() {
+      try {
+        const session = await getSession();
+
+        if (session) {
+          setLoggedIn(true, session.user?.email || "");
+          await loadApplications();
+        } else {
+          setLoggedIn(false);
+        }
+      } catch (error) {
+        setLoggedIn(false);
+        showMessage("Could not check your login session: " + error.message);
+      }
+    }
+
+    initialize();
+  </script>
 </body>
 </html>
