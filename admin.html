@@ -503,11 +503,13 @@
       const frontUrl = application.front_signed_url ||
         application.front_url ||
         application.driver_license_id_front_url ||
+        application.documents?.front_url ||
         "";
 
       const backUrl = application.back_signed_url ||
         application.back_url ||
         application.driver_license_id_back_url ||
+        application.documents?.back_url ||
         "";
 
       const documentLinks = `
