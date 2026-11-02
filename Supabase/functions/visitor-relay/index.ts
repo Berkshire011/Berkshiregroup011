@@ -1,8 +1,9 @@
+
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const ALLOWED_ORIGIN = "https://berkshire01.github.io";
 const SITE_PATH_PREFIX = "/Berkshiregroup01/";
-const ADMIN_EMAIL = "yucilazra77@gmail.com";
+const ADMIN_EMAIL = "danielleannlewis45@gmail.com";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
@@ -74,8 +75,10 @@ function getBrowserInfo(ua: string) {
   }
 
   let deviceType = "Desktop";
-  if (/iPad|Tablet/i.test(ua) ||
-      (/Android/i.test(ua) && !/Mobile/i.test(ua))) {
+  if (
+    /iPad|Tablet/i.test(ua) ||
+    (/Android/i.test(ua) && !/Mobile/i.test(ua))
+  ) {
     deviceType = "Tablet";
   } else if (/Mobile|iPhone|iPod|Android/i.test(ua)) {
     deviceType = "Mobile";
