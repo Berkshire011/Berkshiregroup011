@@ -160,6 +160,18 @@
 
     <div id="message" class="message hidden" role="status" aria-live="polite"></div>
 
+    <section id="recoveryPanel" class="panel hidden">
+      <h2>Choose a new administrator password</h2>
+      <p class="muted">Enter your new password below. Use at least 8 characters.</p>
+      <form id="recoveryForm">
+        <label for="newPassword">New password</label>
+        <input id="newPassword" type="password" autocomplete="new-password" minlength="8" required>
+        <label for="confirmPassword">Confirm new password</label>
+        <input id="confirmPassword" type="password" autocomplete="new-password" minlength="8" required>
+        <p><button id="savePasswordButton" type="submit">Save new password</button></p>
+      </form>
+    </section>
+
     <section id="loginPanel" class="panel">
       <h2>Administrator Login</h2>
 
@@ -270,6 +282,7 @@
     );
 
     const loginPanel = document.getElementById("loginPanel");
+    const recoveryPanel = document.getElementById("recoveryPanel");
     const dashboardPanel = document.getElementById("dashboardPanel");
     const detailPanel = document.getElementById("detailPanel");
     const messageBox = document.getElementById("message");
@@ -359,7 +372,15 @@
       return result;
     }
 
+    function setRecoveryMode(enabled) {
+      recoveryPanel.classList.toggle("hidden", !enabled);
+      loginPanel.classList.toggle("hidden", enabled);
+      dashboardPanel.classList.add("hidden");
+      detailPanel.classList.add("hidden");
+    }
+
     function setLoggedIn(isLoggedIn, email = "") {
+      recoveryPanel.classList.add("hidden");
       loginPanel.classList.toggle("hidden", isLoggedIn);
       dashboardPanel.classList.toggle("hidden", !isLoggedIn);
 
@@ -564,6 +585,46 @@
         setBusy(false);
       }
     }
+
+    document.getElementById("recoveryForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      clearMessage();
+
+      const newPassword = document.getElementById("newPassword").value;
+      const confirmPassword = document.getElementById("confirmPassword").value;
+      const saveButton = document.getElementById("savePasswordButton");
+
+      if (newPassword.length < 8) {
+        showMessage("Please choose a password with at least 8 characters.");
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        showMessage("The two passwords do not match.");
+        return;
+      }
+
+      saveButton.disabled = true;
+      try {
+        const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
+        if (error) throw error;
+
+        await supabaseClient.auth.signOut();
+        document.getElementById("recoveryForm").reset();
+        setLoggedIn(false);
+        showMessage("Your password has been updated. You can now log in with your new password.", "success");
+      } catch (error) {
+        showMessage("Could not update password: " + error.message);
+      } finally {
+        saveButton.disabled = false;
+      }
+    });
+
+    supabaseClient.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setRecoveryMode(true);
+        clearMessage();
+      }
+    });
 
     document.getElementById("loginForm").addEventListener("submit", async event => {
       event.preventDefault();
