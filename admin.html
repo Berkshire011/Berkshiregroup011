@@ -195,6 +195,7 @@
 
         <p>
           <button id="loginButton" type="submit">Log in</button>
+          <button id="forgotPasswordButton" type="button" class="secondary">Forgot password?</button>
         </p>
       </form>
     </section>
@@ -585,6 +586,33 @@
         setBusy(false);
       }
     }
+
+    document.getElementById("forgotPasswordButton").addEventListener("click", async () => {
+      clearMessage();
+
+      const email = document.getElementById("email").value.trim();
+      const button = document.getElementById("forgotPasswordButton");
+
+      if (!email) {
+        showMessage("Enter your administrator email address first.");
+        return;
+      }
+
+      button.disabled = true;
+      try {
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+          redirectTo: "https://berkshire011.github.io/Berkshiregroup011/admin.html"
+        });
+
+        if (error) throw error;
+
+        showMessage("If this email address has an account, a password-reset email has been sent. Open the newest email and follow its link.", "success");
+      } catch (error) {
+        showMessage("Could not send the password-reset email: " + error.message);
+      } finally {
+        button.disabled = false;
+      }
+    });
 
     document.getElementById("recoveryForm").addEventListener("submit", async event => {
       event.preventDefault();
